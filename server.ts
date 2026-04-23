@@ -147,40 +147,41 @@ async function startServer() {
     }
   });
 
-  // Vite middleware setup
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
-  app.listen(PORT, '0.0.0.0', () => {
+  // START SERVER FIRST
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
     
-    // Initialize bot after server is listening
-    console.log('Starting WhatsApp client initialization...');
-    
-    // Check if session directory exists
-    const sessionDir = path.join(process.cwd(), '.wwebjs_auth');
-    if (fs.existsSync(sessionDir)) {
-      console.log('Found existing session data at .wwebjs_auth');
-    } else {
-      console.log('No existing session found. Awaiting fresh scan.');
-    }
+    // START VITE AND BOT IN BACKGROUND
+    setupBackgroundProcesses();
+  });
 
+  async function setupBackgroundProcesses() {
+    // 1. Initialize WhatsApp
+    console.log('Starting WhatsApp client initialization...');
     client.initialize().catch(err => {
       console.error('WhatsApp initialization failed:', err);
       botStatus = `Error: ${err.message || 'Check Server Logs'}`;
     });
-  });
+
+    // 2. Setup Vite middleware (for development)
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        const vite = await createViteServer({
+          server: { middlewareMode: true },
+          appType: 'spa',
+        });
+        app.use(vite.middlewares);
+      } catch (err) {
+        console.error('Vite setup failed:', err);
+      }
+    } else {
+      const distPath = path.join(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
+  }
 }
 
 startServer().catch(err => {
