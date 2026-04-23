@@ -66,35 +66,52 @@ export default function App() {
                 </span>
               </div>
 
-              <div className="aspect-square bg-white p-3 mb-6 relative overflow-hidden group">
-                <AnimatePresence mode="wait">
-                  {qrUrl ? (
-                    <motion.img 
-                      key="qr"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      src={qrUrl} 
-                      className="w-full h-full object-contain" 
-                      alt="Link your device" 
-                    />
-                  ) : status.status === 'Connected' ? (
-                    <motion.div 
-                      key="active"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="w-full h-full flex flex-col items-center justify-center text-black"
+            <div className="relative w-64 h-64 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-300">
+              <AnimatePresence mode="wait">
+                {qrUrl ? (
+                  <motion.img 
+                    key="qr"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    src={qrUrl} 
+                    className="w-full h-full object-contain" 
+                    alt="Link your device" 
+                  />
+                ) : status.status === 'Connected' ? (
+                  <motion.div 
+                    key="active"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="w-full h-full flex flex-col items-center justify-center text-black"
+                  >
+                    <CheckCircle size={48} strokeWidth={1} />
+                    <span className="text-[10px] mt-2 font-bold uppercase tracking-widest">Linked</span>
+                  </motion.div>
+                ) : status.status.startsWith('Error') ? (
+                   <motion.div 
+                    key="error"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="w-full h-full flex flex-col items-center justify-center text-red-500 p-4 text-center"
+                  >
+                    <AlertCircle size={32} />
+                    <span className="text-[10px] mt-2 font-bold uppercase tracking-tight">{status.status}</span>
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="mt-4 text-[9px] bg-red-100 px-3 py-1 rounded-full text-red-700 hover:bg-red-200"
                     >
-                      <CheckCircle size={48} strokeWidth={1} />
-                      <span className="text-[10px] mt-2 font-bold uppercase tracking-widest">Linked</span>
-                    </motion.div>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                      <Smartphone className="animate-bounce" size={32} />
-                    </div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      Retry System
+                    </button>
+                  </motion.div>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                    <Smartphone className="animate-bounce" size={32} />
+                    <span className="text-[8px] uppercase tracking-widest mt-2">{status.status}</span>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
 
               <p className="text-[11px] opacity-40 leading-relaxed italic font-serif">
                 Scan via Linked Devices. Risk acknowledged: secondary SIM recommended for high-volume tasks.

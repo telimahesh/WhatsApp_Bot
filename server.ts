@@ -167,9 +167,18 @@ async function startServer() {
     
     // Initialize bot after server is listening
     console.log('Starting WhatsApp client initialization...');
+    
+    // Check if session directory exists
+    const sessionDir = path.join(process.cwd(), '.wwebjs_auth');
+    if (fs.existsSync(sessionDir)) {
+      console.log('Found existing session data at .wwebjs_auth');
+    } else {
+      console.log('No existing session found. Awaiting fresh scan.');
+    }
+
     client.initialize().catch(err => {
       console.error('WhatsApp initialization failed:', err);
-      botStatus = 'Initialization Error';
+      botStatus = `Error: ${err.message || 'Check Server Logs'}`;
     });
   });
 }
