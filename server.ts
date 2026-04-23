@@ -20,7 +20,16 @@ async function startServer() {
   const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ],
       handleSIGINT: false,
     }
   });
@@ -138,8 +147,6 @@ async function startServer() {
     }
   });
 
-  client.initialize();
-
   // Vite middleware setup
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
@@ -157,7 +164,16 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    
+    // Initialize bot after server is listening
+    console.log('Starting WhatsApp client initialization...');
+    client.initialize().catch(err => {
+      console.error('WhatsApp initialization failed:', err);
+      botStatus = 'Initialization Error';
+    });
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error('Fatal Server Error:', err);
+});
